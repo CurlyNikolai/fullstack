@@ -2,14 +2,16 @@ import { useState } from 'react'
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', 
-      number: '040-1234567'
-    }
+    { name: 'Arto Hellas', number: '040-1234567', id: 1}
   ]) 
   const [newName, setNewName] = useState('new name')
+  const [newNumber, setNewNumber] = useState('new number')
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
+  }
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value)
   }
 
   const addName = (event) => {
