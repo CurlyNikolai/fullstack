@@ -18,7 +18,7 @@ const App = () => {
     setNewNumber(event.target.value)
   }
   const handleFilterChange = (event) => {
-    setFilter(event.target.value.toLowerCase())
+    setFilter(event.target.value)
   }
 
   const addPerson = (event) => {
@@ -44,34 +44,51 @@ const App = () => {
 
   const personsToShow = (filter === '')
     ? persons
-    : persons.filter(person => person.name.substring(0, filter.length).toLowerCase() === filter)
+    : persons.filter(person => person.name.substring(0, filter.length).toLowerCase() === filter.toLowerCase())
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with: <input value={filter} onChange={handleFilterChange}/>
-      </div>
+      <Filter filter={filter} handleFilterChange={handleFilterChange}/>
       <h2>add a new</h2>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange}/>
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange}/>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange}
+                  newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      {personsToShow.map(person => <Person key={person.id} person={person}/>)}
+      <Persons persons={personsToShow}/>
     </div>
   )
 }
 
 const Person = ({person}) => {
   return <>{person.name} {person.number}<br/></>
+}
+
+const Filter = ({filter, handleFilterChange}) => {
+  return (
+    <div>
+      filter shown with: <input value={filter} onChange={handleFilterChange}/>
+    </div>
+  )
+}
+
+const PersonForm = (props) => {
+  return (
+    <form onSubmit={props.addPerson}>
+    <div>
+      name: <input value={props.newName} onChange={props.handleNameChange}/>
+    </div>
+    <div>
+      number: <input value={props.newNumber} onChange={props.handleNumberChange}/>
+    </div>
+    <div>
+      <button type="submit">add</button>
+    </div>
+  </form>
+  )
+}
+
+const Persons = ({persons}) => {
+  return persons.map(person => <Person key={person.id} person={person}/>)
 }
 
 export default App
