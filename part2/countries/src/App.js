@@ -5,6 +5,8 @@ function App() {
 
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
+  const [country, setCountry] = useState()
+
   const hook = () => {
     axios
       .get('https://restcountries.com/v3.1/all')
