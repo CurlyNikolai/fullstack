@@ -49,18 +49,19 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
+      
       <h2>add a new</h2>
+      
       <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange}
                   newNumber={newNumber} handleNumberChange={handleNumberChange}/>
+      
       <h2>Numbers</h2>
+      
       <Persons persons={personsToShow}/>
     </div>
   )
-}
-
-const Person = ({person}) => {
-  return <>{person.name} {person.number}<br/></>
 }
 
 const Filter = ({filter, handleFilterChange}) => {
@@ -89,6 +90,10 @@ const PersonForm = (props) => {
 
 const Persons = ({persons}) => {
   return persons.map(person => <Person key={person.id} person={person}/>)
+}
+
+const Person = ({person}) => {
+  return <>{person.name} {person.number}<br/></>
 }
 
 export default App
