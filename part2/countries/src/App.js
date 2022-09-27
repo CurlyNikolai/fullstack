@@ -5,7 +5,6 @@ function App() {
 
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
-  const [country, setCountry] = useState()
 
   const hook = () => {
     axios
@@ -41,6 +40,27 @@ const Countries = ({countries}) => {
 
 const CountryInfo = ({country}) => {
   const languages = Object.values(country.languages)
+  const [weather, setWeather] = useState({
+    current: {
+      temp: 0
+    }
+  })
+
+  const hook = () => {
+    const api_key = process.env.REACT_APP_API_KEY
+    const lat = 60.17
+    const lng = 24.93
+
+
+    axios
+      .get(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lng}&exclude={part}&appid=${api_key}`)
+      .then(response => {
+        setWeather(response.data)
+      })
+  }
+
+  useEffect(hook, [])
+
   return (
   <div>
     <h1>{country.name.common}</h1>
@@ -54,6 +74,7 @@ const CountryInfo = ({country}) => {
     </ul>
     <img src={country.flags.png} alt="flag"></img>
     <h2>Weather in {country.capital}</h2>
+    <p>{weather.current.temp - 272.15}</p>
   </div>)
 }
 
