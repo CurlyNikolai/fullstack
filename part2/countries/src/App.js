@@ -48,8 +48,9 @@ const CountryInfo = ({country}) => {
 
   const hook = () => {
     const api_key = process.env.REACT_APP_API_KEY
-    const lat = 60.17
-    const lng = 24.93
+    const latlng = country.capitalInfo.latlng
+    const lat = latlng[0]
+    const lng = latlng[1]
 
 
     axios
@@ -59,7 +60,7 @@ const CountryInfo = ({country}) => {
       })
   }
 
-  useEffect(hook, [])
+  useEffect(hook, [country])
 
   return (
   <div>
@@ -74,7 +75,8 @@ const CountryInfo = ({country}) => {
     </ul>
     <img src={country.flags.png} alt="flag"></img>
     <h2>Weather in {country.capital}</h2>
-    <p>{weather.current.temp - 272.15}</p>
+    <p>temperature {(weather.current.temp - 272.15).toFixed(2)} Celcius</p>
+    <p>wind {weather.current.wind_speed.toFixed(2)} m/s</p>
   </div>)
 }
 
