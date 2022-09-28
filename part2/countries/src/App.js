@@ -42,7 +42,8 @@ const CountryInfo = ({country}) => {
   const languages = Object.values(country.languages)
   const [weather, setWeather] = useState({
     current: {
-      temp: 0
+      temp: 0,
+      wind_speed: 0
     }
   })
 
