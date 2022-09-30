@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -8,10 +8,10 @@ const App = () => {
   const [filter, setFilter] = useState('')
 
   const hook = () => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }
   useEffect(hook, [])
@@ -29,28 +29,61 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
 
-    const names = persons.map(person => person.name)
-    const duplicate = names.some((name) => name === newName)
-    
-    if (newName.length === 0 || newName === 'new name' || duplicate) {
-      if (duplicate)
-        window.alert(newName + ' is already added to the phonebook')
+    const existingPerson = persons.find(person => person.name === newName)
+
+    if (newName.length === 0 || newName === 'new name') {
+      window.alert("Please insert a valid name and number!")
       return
     }
-
+  
+    if (existingPerson !== undefined) {
+      if (existingPerson.number === newNumber) {
+        window.alert(newName + ' already exists with this number!')
+      }
+      else {
+        const personObject = {
+          name : existingPerson.name,
+          number : newNumber,
+          id : existingPerson.id
+        }
+        if (window.confirm(`${existingPerson.name} already added to phonebook, replace old number with new one?`)) {
+          personService
+            .update(existingPerson.id, personObject)
+            .then(updatedPerson => {
+              setPersons(persons.map(person => (person.id !== existingPerson.id) ? person : updatedPerson))
+            })
+        }
+      }
+      return
+    }
+  
+    const newID = (persons.length > 0) ? persons[persons.length-1].id + 1 : 1
     const personObject = {
       name : newName,
       number : newNumber,
-      id : persons.length+1
+      id : newID
     }
-
-    axios
-      .post('http://localhost:3001/persons', personObject)
-      .then(response => {
-        setPersons(persons.concat(response.data))
+    
+    personService
+      .create(personObject)
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson))
         setNewName('')
         setNewNumber('')
       })
+  }
+
+  const deletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .remove(person.id)
+        .then( () => {
+          console.log(`deleted ${person.name}`)
+          personService
+            .getAll()
+            .then(updatedPersons => setPersons(updatedPersons))
+        })
+    }
   }
 
   const personsToShow = (filter === '')
@@ -70,7 +103,7 @@ const App = () => {
       
       <h2>Numbers</h2>
       
-      <Persons persons={personsToShow}/>
+      <Persons persons={personsToShow} deletePerson={deletePerson}/>
     </div>
   )
 }
@@ -99,12 +132,12 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = ({persons}) => {
-  return persons.map(person => <Person key={person.id} person={person}/>)
+const Persons = ({persons, deletePerson}) => {
+  return persons.map(person => <Person key={person.id} person={person} deletePerson={deletePerson}/>)
 }
 
-const Person = ({person}) => {
-  return <>{person.name} {person.number}<br/></>
+const Person = ({person, deletePerson}) => {
+  return <>{person.name} {person.number} <button onClick={() => deletePerson(person)}>delete</button><br/></>
 }
 
 export default App
