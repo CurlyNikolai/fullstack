@@ -25,26 +25,32 @@ const App = () => {
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
-
+  
   const addPerson = (event) => {
     event.preventDefault()
 
     const names = persons.map(person => person.name)
     const duplicate = names.some((name) => name === newName)
+    
     if (newName.length === 0 || newName === 'new name' || duplicate) {
       if (duplicate)
         window.alert(newName + ' is already added to the phonebook')
       return
     }
+
     const personObject = {
       name : newName,
       number : newNumber,
       id : persons.length+1
     }
 
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
+    axios
+      .post('http://localhost:3001/persons', personObject)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+      })
   }
 
   const personsToShow = (filter === '')
