@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
+import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('new name')
   const [newNumber, setNewNumber] = useState('new number')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState({
+    message : null,
+    isError : false,
+  })
 
   const hook = () => {
     personService
@@ -25,18 +30,30 @@ const App = () => {
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
-  
+
+  const handleMissingPerson = (person) => {
+    setNotification({
+        message:`Information of ${person.name} missing on server, refreshing`,
+        isError: true
+      })
+    personService
+      .getAll()
+      .then(updatedPersons => setPersons(updatedPersons))
+    setTimeout(() => {
+      setNotification({message:null})
+    }, 5000)
+  }
+
   const addPerson = (event) => {
     event.preventDefault()
-
-    const existingPerson = persons.find(person => person.name === newName)
-
+    
     if (newName.length === 0 || newName === 'new name') {
       window.alert("Please insert a valid name and number!")
       return
     }
-  
+
     // If the entered name already exists in phonebook
+    const existingPerson = persons.find(person => person.name === newName)
     if (existingPerson !== undefined) {
       if (existingPerson.number === newNumber) {
         window.alert(newName + ' already exists with this number!')
@@ -52,9 +69,16 @@ const App = () => {
             .update(existingPerson.id, personObject)
             .then(updatedPerson => {
               setPersons(persons.map(person => (person.id !== existingPerson.id) ? person : updatedPerson))
+              setNotification({
+                message:`Updated ${personObject.name}`,
+                isError: false
+              })
+              setTimeout(() => {
+                setNotification({message:null})
+              }, 5000)
             })
             .catch(error => {
-              alert(`${existingPerson.name} could not be updated!`)
+              handleMissingPerson(personObject)
             })
         }
       }
@@ -75,9 +99,22 @@ const App = () => {
         setPersons(persons.concat(newPerson))
         setNewName('')
         setNewNumber('')
+        setNotification({
+          message:`Added ${personObject.name}`,
+          isError: false
+        })
+        setTimeout(() => {
+          setNotification({message:null})
+        }, 5000)
       })
       .catch(error => {
-        alert(`${personObject.name} could not be added`)
+        setNotification({
+          message:`${personObject.name} could not be added`,
+          isError: true
+        })
+        setTimeout(() => {
+          setNotification({message:null})
+        }, 5000)
       })
   }
 
@@ -90,13 +127,17 @@ const App = () => {
           personService
             .getAll()
             .then(updatedPersons => setPersons(updatedPersons))
+          setNotification({
+                message:`Deleted ${person.name}`,
+                isError: false
+          })
+          setTimeout(() => {
+            setNotification({ message:null})
+          }, 5000)
         })
         .catch(error => {
-        alert(`${person.name} might already be deleted, refreshing`)
-        personService
-            .getAll()
-            .then(updatedPersons => setPersons(updatedPersons))
-      })
+          handleMissingPerson(person)
+        })
     }
   }
 
@@ -107,7 +148,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-
+      <Notification errorMessage={notification}/>
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
       
       <h2>add a new</h2>
@@ -152,6 +193,26 @@ const Persons = ({persons, deletePerson}) => {
 
 const Person = ({person, deletePerson}) => {
   return <>{person.name} {person.number} <button onClick={() => deletePerson(person)}>delete</button><br/></>
+}
+
+const Notification = ({ errorMessage }) => {
+  if (errorMessage.message === null) {
+    return null
+  }
+
+  if (errorMessage.isError) {
+    return (
+    <div className='error'>
+      {errorMessage.message}
+    </div>
+  )  
+  }
+
+  return (
+    <div className='info'>
+      {errorMessage.message}
+    </div>
+  )
 }
 
 export default App
