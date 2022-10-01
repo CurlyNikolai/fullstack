@@ -58,10 +58,10 @@ const CountryInfo = ({country}) => {
     const latlng = country.capitalInfo.latlng
     const lat = latlng[0]
     const lng = latlng[1]
-
     axios
       .get(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lng}&exclude={part}&appid=${api_key}`)
       .then(response => {
+
         setWeather(response.data)
       })
   }

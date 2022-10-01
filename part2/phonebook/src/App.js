@@ -36,6 +36,7 @@ const App = () => {
       return
     }
   
+    // If the entered name already exists in phonebook
     if (existingPerson !== undefined) {
       if (existingPerson.number === newNumber) {
         window.alert(newName + ' already exists with this number!')
@@ -52,11 +53,15 @@ const App = () => {
             .then(updatedPerson => {
               setPersons(persons.map(person => (person.id !== existingPerson.id) ? person : updatedPerson))
             })
+            .catch(error => {
+              alert(`${existingPerson.name} could not be updated!`)
+            })
         }
       }
       return
     }
   
+    // If the entered name is a new one
     const newID = (persons.length > 0) ? persons[persons.length-1].id + 1 : 1
     const personObject = {
       name : newName,
@@ -71,6 +76,9 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(error => {
+        alert(`${personObject.name} could not be added`)
+      })
   }
 
   const deletePerson = (person) => {
@@ -83,6 +91,12 @@ const App = () => {
             .getAll()
             .then(updatedPersons => setPersons(updatedPersons))
         })
+        .catch(error => {
+        alert(`${person.name} might already be deleted, refreshing`)
+        personService
+            .getAll()
+            .then(updatedPersons => setPersons(updatedPersons))
+      })
     }
   }
 
